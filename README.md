@@ -1,5 +1,5 @@
-# Jai Template
-A Template Repository for Jai
+# jacr
+a Jai Cryptography tool
 
 ```console
 $ jai -version

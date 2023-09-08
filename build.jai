@@ -1,7 +1,7 @@
 #jai {
 	set_build_options_dc(.{do_output=false});
 
-	workspace := compiler_create_workspace("Template Workspace");
+	workspace := compiler_create_workspace("jacr Workspace");
 	if !workspace {
 		log_error("Failed to create workspace.\n");
 		return;

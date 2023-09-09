@@ -1,3 +1,14 @@
+test_cipher :: (name: string, func: Cipher, param: Options, expected: string) {
+	print_res := (func: string, opts: Options, res: string) {
+		print("%(%) = %\n", func, opts, res);
+	}
+
+	res := func(param);
+	print_res(name, param, res);
+	assert(res == expected);
+	print("SUCCESS: %\n", name);
+}
+
 main :: () {
 	table : Table(string, Cipher);
 	init(*table);
@@ -5,28 +16,52 @@ main :: () {
 	// Generated in build.jai
 	add_ciphers_to_table(*table);
 
-	print_res := (func: string, opts: Options, res: string) {
-		print("%(%) = %\n", func, opts, res);
-	}
 	
-	for cipher: table {
+	for table {
 		if it_index == {
 			case "rot13";
-			opts := Options.{
-				inp = "Hello, World!",
-			};
-			res := cipher(opts);
-			print_res(it_index, opts, res);
-			assert(res == "Uryyb, Jbeyq!");
+			test_cipher(
+				it_index,
+				it,
+				Options.{
+					inp = "Hello, World!"
+				},
+				"Uryyb, Jbeyq!"
+			);
 			
 			case "caesar";
-			opts := Options.{
-				inp = "Hello, World!",
-				key = 19,
-			};
-			res := cipher(opts);
-			print_res(it_index, opts, res);
-			assert(res == "Axeeh, Phkew!");
+			test_cipher(
+				it_index,
+				it,
+				Options.{
+					key_type = .INT,
+					key_int = 19,
+					inp = "Hello, World!"
+				},
+				"Axeeh, Phkew!"
+			);
+
+			case "xor";
+			test_cipher(
+				it_index,
+				it,
+				Options.{
+					inp = "Hello, World!",
+					key_type = .HEX,
+					key_string = "0F",
+				},
+				"Gjcc`#/X`}ck.",
+			);
+
+			case "hex";
+			test_cipher(
+				it_index,
+				it,
+				Options.{
+					inp = "Hello, World!",
+				},
+				"48656c6c6f2c20576f726c6421"
+			);
 		}
 	}
 }

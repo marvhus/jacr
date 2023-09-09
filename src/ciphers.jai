@@ -8,21 +8,35 @@ test :: (inp: string) -> string {
 
 Options :: struct {
 	inp: string;
-	key: int;
+
+	key_type: enum {
+		INT;
+		STRING;
+		HEX;
+	};
+	union {
+		key_int: int;
+		key_string: string;
+	}
 }
 
 rot13 :: (using opts: Options) -> string {
 	assert(inp != "");
 	
-	new_opts: Options;
-	new_opts.inp = inp;
-	new_opts.key = 13;
+	new_opts := Options.{
+		inp = inp,
+		key_type = .INT,
+		key_int = 13,
+	};
 
 	return caesar(new_opts);
 } @cipher
 
 caesar :: (using opts: Options) -> string {
 	assert(inp != "");
+	assert(key_type == .INT);
+	key := key_int;
+	assert(key_int != 0);
 
 	out: [..]u8;
 	chr: s64;
@@ -36,7 +50,7 @@ caesar :: (using opts: Options) -> string {
 			continue;
 		}
 
-		offset := ifx is_upper(cast,no_check(u8) chr) then 65 else 97;
+		offset := ifx is_upper(cast,no_check(u8) chr) then #char "A" else #char "a";
 		chr += key - offset;
 		chr %= 26;
 		chr += offset;
@@ -46,8 +60,76 @@ caesar :: (using opts: Options) -> string {
 	return to_string(out);
 } @cipher
 
+xor :: (using opts: Options) -> string {
+	assert(inp != "");
+	assert(key_type == .HEX); // it's .STRING, but we only handle hex input atm
+	key := hex_str_to_u8s(key_string);
+	assert(key.count > 0);
+	
+	out: [..]u8;
+	chr: u8;
+	for 0..inp.count-1 {
+		chr = inp[it] ^ key[it % key.count];
+		array_add(*out, chr);
+	}
+	return to_string(out);
+} @cipher
+
+hex :: (using opts: Options) -> string {
+	assert(inp.count > 0);
+	// This feels a little like cheating, but it works
+	chrs :: u8.[
+		#char "0", #char "1", #char "2", #char "3",
+		#char "4", #char "5", #char "6", #char "7",
+		#char "8", #char "9", #char "a", #char "b",
+		#char "c", #char "d", #char "e", #char "f",
+	];
+	out: [..]u8;
+	counter := 0;
+	for 0..inp.count-1 {
+		chr := inp[it];
+		first := (chr & 0xf0) >> 4;
+		last  := chr & 0x0f;
+		array_add(*out, chrs[first]);
+		array_add(*out, chrs[last]);
+	}
+	return to_string(out);
+} @cipher
+
 #scope_file
 
 is_upper :: (chr: u8) -> bool {
 	return chr >= #char "A" && chr <= #char "Z";
 }
+is_validhex :: (chr: u8) -> bool {
+	return (chr >= #char "A" && chr <= #char "F")
+		|| (chr >= #char "a" && chr <= #char "f")
+		|| (chr >= #char "0" && chr <= #char "9");
+}
+
+hex_str_to_u8s :: (inp: string) -> []u8 {
+	out: [..]u8;
+	counter := inp.count % 2;
+	val : u8 = 0;
+	for 0..inp.count-1 {
+		chr := to_lower(inp[it]);
+		assert(is_validhex(chr));
+		if it != 0 && counter == 0 {
+			array_add(*out, val);
+			val = 0;
+		}
+		// chars are checked earlier, it's guaranteed to be alpha or num
+		chr_num := ifx is_alpha(chr) then #char "a" - 10 else #char "0";
+		chr_num = chr - chr_num;
+		if counter == 0 then chr_num *= 16;
+		val += cast,no_check(u8) chr_num;
+
+		counter += 1;
+		counter %= 2;
+	}
+	array_add(*out, val);
+
+	return out;
+}
+
+

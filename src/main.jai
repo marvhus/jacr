@@ -24,9 +24,19 @@ main :: () {
 				it_index,
 				it,
 				Options.{
+					mode = .ENCODE,
 					inp = "Hello, World!"
 				},
 				"Uryyb, Jbeyq!"
+			);
+			test_cipher(
+				it_index,
+				it,
+				Options.{
+					mode = .DECODE,
+					inp = "Uryyb, Jbeyq!"
+				},
+				"Hello, World!"
 			);
 			
 			case "caesar";
@@ -34,11 +44,23 @@ main :: () {
 				it_index,
 				it,
 				Options.{
+					mode = .ENCODE,
 					key_type = .INT,
 					key_int = 19,
 					inp = "Hello, World!"
 				},
 				"Axeeh, Phkew!"
+			);
+			test_cipher(
+				it_index,
+				it,
+				Options.{
+					mode = .DECODE,
+					key_type = .INT,
+					key_int = 19,
+					inp = "Axeeh, Phkew!"
+				},
+				"Hello, World!"
 			);
 
 			case "xor";
@@ -46,11 +68,23 @@ main :: () {
 				it_index,
 				it,
 				Options.{
+					mode = .ENCODE,
 					inp = "Hello, World!",
 					key_type = .HEX,
 					key_string = "0F",
 				},
 				"Gjcc`#/X`}ck.",
+			);
+			test_cipher(
+				it_index,
+				it,
+				Options.{
+					mode = .DECODE,
+					inp = "Gjcc`#/X`}ck.",
+					key_type = .HEX,
+					key_string = "0F",
+				},
+				"Hello, World!",
 			);
 
 			case "hex";
@@ -58,9 +92,10 @@ main :: () {
 				it_index,
 				it,
 				Options.{
-					inp = "Hello, World!",
+					mode = .DECODE,
+					inp = "48656c6c6f2c20576f726c6421",
 				},
-				"48656c6c6f2c20576f726c6421"
+				"Hello, World!"
 			);
 		}
 	}

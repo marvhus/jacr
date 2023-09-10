@@ -1,7 +1,7 @@
 handle_args :: () -> (string, Options) {
 	args := get_command_line_arguments();
 
-	if args.count < 4 {
+	if args.count < 3 {
 		// @NOTE will not checking if args at least has a length of 1 be an issue here?
 		print("Expected % <mode> <cipher>\n", args[0]);
 		exit(1);

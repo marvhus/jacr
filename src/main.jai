@@ -2,19 +2,35 @@ handle_args :: () -> (string, Options) {
 	// @TODO add support for getting input from stdin
 	args := get_command_line_arguments();
 
-	if args.count < 3 {
+	if args.count < 4 {
 		// @NOTE will not checking if args at least has a length of 1 be an issue here?
-		print("Expected % <cipher> <input>", args[0]);
+		print("Expected % <mode> <cipher> <input>", args[0]);
 		exit(1);
 	}
 
-	cipher := args[1];
+	cipher := args[2];
 	opts := Options.{
-		mode = .ENCODE,
-		inp = args[2],
+		inp = args[3],
 	};
+	if to_lower(args[1]) == {
+		case "e"; #through;
+		case "enc"; #through;
+		case "encode"; #through;
+		case "encrypt";
+		opts.mode = .ENCODE;
 
-	idx := 3;
+		case "d"; #through;
+		case "dec"; #through;
+		case "decode"; #through;
+		case "decrypt";
+		opts.mode = .DECODE;
+
+		case;
+		print("Unknown mode '%'\n", args[1]);
+		exit(1);
+	}
+
+	idx := 4;
 	while idx < args.count {
 		arg := args[idx];
 		if arg == {
@@ -37,6 +53,14 @@ handle_args :: () -> (string, Options) {
 	}
 
 	return cipher, opts;
+}
+
+to_lower :: (inp: string) -> string {
+	out: [..]u8;
+	for 0..inp.count-1 {
+		array_add(*out, to_lower(inp[it]));
+	}
+	return to_string(out);
 }
 
 main :: () {

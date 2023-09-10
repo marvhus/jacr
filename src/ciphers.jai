@@ -29,7 +29,8 @@ rot13 :: (using opts: Options) -> string {
 
 caesar :: (using opts: Options) -> string {
 	assert(inp != "");
-	assert(false);
+	key_num, success, _ := to_integer(key);
+	assert(success);
 
 	out: [..]u8;
 	chr: s64;

@@ -11,27 +11,17 @@ Options :: struct {
 		ENCODE;
 		DECODE;
 	}
-	
 	inp: string;
-
-	key_type: enum {
-		INT;
-		STRING;
-		HEX;
-	};
-	union {
-		key_int: int;
-		key_string: string;
-	}
+	key: string;
 }
 
 rot13 :: (using opts: Options) -> string {
 	assert(inp != "");
 	
 	new_opts := Options.{
+		mode = mode,
 		inp = inp,
-		key_type = .INT,
-		key_int = 13,
+		key = "13",
 	};
 
 	return caesar(new_opts);
@@ -39,9 +29,7 @@ rot13 :: (using opts: Options) -> string {
 
 caesar :: (using opts: Options) -> string {
 	assert(inp != "");
-	assert(key_type == .INT);
-	key := key_int;
-	assert(key != 0);
+	assert(false);
 
 	out: [..]u8;
 	chr: s64;
@@ -59,9 +47,9 @@ caesar :: (using opts: Options) -> string {
 		chr -= offset;
 		if mode == {
 			case .ENCODE;
-			chr += key;
+			//chr += key;
 			case .DECODE;
-			chr -= key;
+			//chr -= key;
 			case;
 			assert(false, "Unsupported mode for Caesar");
 		}
@@ -75,16 +63,15 @@ caesar :: (using opts: Options) -> string {
 	return to_string(out);
 } @cipher
 
-xor :: (using opts: Options) -> string {
-	assert(inp != "");
-	assert(key_type == .HEX); // it's .STRING, but we only handle hex input atm
-	key := hex_str_to_u8s(key_string);
+xor :: (opts: Options) -> string {
+	assert(opts.inp != "");
+	key := hex_str_to_u8s(opts.key);
 	assert(key.count > 0);
 	
 	out: [..]u8;
 	chr: u8;
-	for 0..inp.count-1 {
-		chr = inp[it] ^ key[it % key.count];
+	for 0..opts.inp.count-1 {
+		chr = opts.inp[it] ^ key[it % key.count];
 		array_add(*out, chr);
 	}
 	return to_string(out);

@@ -48,9 +48,9 @@ caesar :: (using opts: Options) -> string {
 		chr -= offset;
 		if mode == {
 			case .ENCODE;
-			//chr += key;
+			chr += key_num;
 			case .DECODE;
-			//chr -= key;
+			chr -= key_num;
 			case;
 			assert(false, "Unsupported mode for Caesar");
 		}

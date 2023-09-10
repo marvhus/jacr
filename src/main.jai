@@ -1,17 +1,14 @@
 handle_args :: () -> (string, Options) {
-	// @TODO add support for getting input from stdin
 	args := get_command_line_arguments();
 
 	if args.count < 4 {
 		// @NOTE will not checking if args at least has a length of 1 be an issue here?
-		print("Expected % <mode> <cipher> <input>", args[0]);
+		print("Expected % <mode> <cipher>\n", args[0]);
 		exit(1);
 	}
 
 	cipher := args[2];
-	opts := Options.{
-		inp = args[3],
-	};
+	opts: Options;
 	if to_lower(args[1]) == {
 		case "e"; #through;
 		case "enc"; #through;
@@ -30,19 +27,29 @@ handle_args :: () -> (string, Options) {
 		exit(1);
 	}
 
-	idx := 4;
+	found_inp := false;
+	idx := 3;
 	while idx < args.count {
 		arg := args[idx];
 		if arg == {
+			case "-i";
+			// Inp, next arg is the input
+			idx += 1;
+			if idx >= args.count {
+				print("Expected input after '-i'\n");
+				exit(1);
+			}
+			opts.inp = args[idx];
+			found_inp = true;
+			
 			case "-k";
 			// Key, next arg is the key
-			if idx+1 < args.count {
-				idx += 1;
-				opts.key = args[idx];
-			} else {
+			idx += 1;
+			if idx >= args.count {
 				print("Expected key after '-k'\n");
 				exit(1);
 			}
+			opts.key = args[idx];
 
 			case;
 			print("Unexpected arg '%'\n", arg);
@@ -51,6 +58,9 @@ handle_args :: () -> (string, Options) {
 
 		idx += 1;
 	}
+	
+	// Blocking Console Input (used for | support)
+	if !found_inp then opts.inp = input(); 
 
 	return cipher, opts;
 }
@@ -84,3 +94,4 @@ main :: () {
 #import "Basic";
 
 #load "ciphers.jai";
+#load "input.jai";

@@ -1,4 +1,5 @@
 help_menu :: () {
+    // @TODO find a way to dynamically add ciphers so that I don't have to update this every time
     print(#string END_MESSAGE
 
 Usage: jacr <mode> <cipher> [options]

@@ -43,6 +43,11 @@ Options:
         pass a string of text after this to specify the key.
         what is required to be in the key changes depending on the cipher.
 
+	-h
+	    open the help menu.
+		alternative flags/arguments:
+		h, help, -help, --help
+
 Examples:
 
     jacr e rot13 -i 'Hello, World!'
@@ -77,6 +82,7 @@ handle_args :: () -> (string, Options) {
 	if args.count < 3 {
 		// @NOTE will not checking if args at least has a length of 1 be an issue here?
 		print("Expected % <mode> <cipher>\n", args[0]);
+		print("For a full list of what you can do use the -h argument first\n");
 		exit(1);
 	}
 
@@ -160,7 +166,14 @@ main :: () {
 		exit(1);
 	}
 
-	print("%\n", cipher_func(opts));
+	res: string;
+	success, res = cipher_func(opts);
+	if !success {
+		print("Cipher had errors. Exiting.\n");
+		return;
+	}
+
+	print("Result | '%'\n", res); 
 }
 
 #import "Hash_Table";

@@ -1,7 +1,7 @@
-Cipher :: #type (Options) -> string;
+Cipher :: #type (Options) -> bool, string;
 
 /* template
-test :: (inp: string) -> string {
+test :: (inp: string) -> bool, string {
 	return inp;
 } @cipher
 */
@@ -15,8 +15,9 @@ Options :: struct {
 	key: string = "";
 }
 
-rot13 :: (using opts: Options) -> string {
-    check_error(inp.count > 0, "No text input", opts);
+rot13 :: (using opts: Options) -> bool, string {
+    failed := check_error(inp.count > 0, "No text input", opts);
+	if failed return (false, "");
 	
 	new_opts := Options.{
 		mode = mode,
@@ -24,13 +25,15 @@ rot13 :: (using opts: Options) -> string {
 		key = "13",
 	};
 
-	return caesar(new_opts);
+	success, res := caesar(new_opts);
+	return success, res;
 } @cipher
 
-caesar :: (using opts: Options) -> string {
-    check_error(inp.count > 0, "No text input", opts);
+caesar :: (using opts: Options) -> bool, string {
+    failed := check_error(inp.count > 0, "No text input", opts);
 	key_num, success, _ := to_integer(key);
-	check_error(success, "Key is not an integer", opts);
+	failed |= check_error(success, "Key is not an integer", opts);
+	if failed return (false, "");
 
 	out: [..]u8;
 	chr: s64;
@@ -53,6 +56,7 @@ caesar :: (using opts: Options) -> string {
 			chr -= key_num;
 			case;
             check_error(false, "Unsupported mode for Caesar", opts);
+			return (false, "");
 		}
 		chr %= 26;
 		// modulo doesn't wrap negative numbers, so we have to do it ourselves
@@ -61,14 +65,16 @@ caesar :: (using opts: Options) -> string {
 
 		array_add(*out, cast,no_check(u8) chr);
 	}
-	return to_string(out);
+	return (true, to_string(out));
 } @cipher
 
-xor :: (opts: Options) -> string {
-    check_error(opts.inp.count > 0, "No text input", opts);
-    check_error(opts.key.count > 0, "Empty hex key", opts);
+xor :: (opts: Options) -> bool, string {
+    failed := check_error(opts.inp.count > 0, "No text input", opts);
+    failed |= check_error(opts.key.count > 0, "Empty hex key", opts);
+	if failed return (false, "");
 	key := hex_str_to_u8s(opts.key);
-    check_error(key.count > 0, "Invalid hex key", opts);
+    failed |= check_error(key.count > 0, "Invalid hex key", opts);
+	if failed return (false, "");
 	
 	out: [..]u8;
 	chr: u8;
@@ -76,11 +82,12 @@ xor :: (opts: Options) -> string {
 		chr = opts.inp[it] ^ key[it % key.count];
 		array_add(*out, chr);
 	}
-	return to_string(out);
+	return (true, to_string(out));
 } @cipher
 
-hex :: (using opts: Options) -> string {
-    check_error(inp.count > 0, "No text input", opts);
+hex :: (using opts: Options) -> bool, string {
+    failed := check_error(inp.count > 0, "No text input", opts);
+	if failed return (false, "");
 
 	if mode == {
 		case .ENCODE;
@@ -100,16 +107,17 @@ hex :: (using opts: Options) -> string {
 			array_add(*out, chrs[first]);
 			array_add(*out, chrs[last]);
 		}
-		return to_string(out);
+		return (true, to_string(out));
 
 		case .DECODE;
         hex := hex_str_to_u8s(inp);
-        check_error(hex.count > 0, "Invalid hex input", opts);
-		return to_string(hex);
+        failed |= check_error(hex.count > 0, "Invalid hex input", opts);
+		if failed return (false, "");
+		return (true, to_string(hex));
 	}
 
 	check_error(false, "Unimplemented mode for hex", opts);
-	return "";
+	return (false, "");
 } @cipher
 
 #scope_file
@@ -152,9 +160,8 @@ hex_str_to_u8s :: (inp: string) -> []u8 {
 }
 
 // @TODO maybe add a separate one for "Empty text input", it may be handy, since I am repeating it a lot.
-check_error :: (condition: bool, message: string, opts: Options) {
-    if condition return;
-    print("ERROR: '%' with options %\n", message, opts); 
-
-    exit(1);
+check_error :: (condition: bool, message: string, opts: Options) -> bool {
+    if condition return false;
+    print("[ERROR] '%' with options %\n", message, opts); 
+	return true;
 }

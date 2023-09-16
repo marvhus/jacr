@@ -43,10 +43,10 @@ Options:
         pass a string of text after this to specify the key.
         what is required to be in the key changes depending on the cipher.
 
-	-h
-	    open the help menu.
-		alternative flags/arguments:
-		h, help, -help, --help
+    -h
+        open the help menu.
+        alternative flags/arguments:
+        h, help, -help, --help
 
 Examples:
 

@@ -1,4 +1,9 @@
 # jacr
+
+> [!WARNING]
+> This tool is unfinished. Lower your expectations.
+> Also, if you want a slightly more stable experience, use the latest release instead of building it yourself.
+
 a Jai Cryptography tool
 
 ```console

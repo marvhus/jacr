@@ -33,7 +33,8 @@ main :: () {
 #import "Hash_Table";
 #import "Basic";
 
-#load "ciphers.jai";
+#load "cipher.jai";
+#load "cipher_util.jai";
 
 #if TESTING {
     #load "test.jai";

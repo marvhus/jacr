@@ -34,7 +34,15 @@
 
     // Add file to compile
     compiler_begin_intercept(workspace);
-    add_build_file(tprint("src/main.jai"), workspace);
+    add_build_file("src/main.jai", workspace);
+
+    // Add ciphers in ./src/ciphers directory
+    files := file_list("./src/ciphers", true);
+    for path: files {
+        // only include jai source files
+        if !ends_with(path, ".jai") continue; 
+        add_build_file(path, workspace);
+    }
 
     // Add and set TESTING variable
     add_build_string(tprint("TESTING :: %;\n", testing), workspace);
@@ -84,6 +92,7 @@ generate_code :: (functions: []string) -> string {
     return builder_to_string(*builder);
 }
 
+#import "File_Utilities";
 #import "Compiler";
 #import "String";
 #import "Basic";

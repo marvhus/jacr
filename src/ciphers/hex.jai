@@ -32,3 +32,27 @@ hex :: (using opts: Options) -> bool, string {
     check_error(false, "Unimplemented mode for hex", opts);
     return (false, "");
 } @cipher
+
+#if TESTING {
+hex_test :: () -> u16 {
+    failed: u16;
+    decoded := "Hello, World!";
+    encoded := "48656c6c6f2c20576f726c6421";
+
+    success, resp := hex(.{
+        mode = .ENCODE,
+        inp = decoded,
+    });
+    success &= resp == encoded;
+    print_ok_or_fail(success, "Hex", "Encoding");
+
+    success, resp = hex(.{
+        mode = .DECODE,
+        inp = encoded,
+    });
+    success &= resp == decoded;
+    print_ok_or_fail(success, "Hex", "Decoding");
+
+    return failed;
+} @test
+}

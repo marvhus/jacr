@@ -14,3 +14,29 @@ xor :: (opts: Options) -> bool, string {
     }
     return (true, to_string(out));
 } @cipher
+
+#if TESTING {
+xor_test :: () -> u16 {
+    failed: u16;
+    decoded := "Hello, World!";
+    encoded := "Gjcc`#/X`}ck.";
+
+    success, resp := xor(.{
+        mode = .ENCODE,
+        key = "0F",
+        inp = decoded,
+    });
+    success &= resp == encoded;
+    print_ok_or_fail(success, "Xor", "Encoding");
+
+    success, resp = xor(.{
+        mode = .DECODE,
+        key = "0F",
+        inp = encoded,
+    });
+    success &= resp == decoded;
+    print_ok_or_fail(success, "Xor", "Decoding");
+
+    return failed;
+} @test
+}

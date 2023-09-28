@@ -1,16 +1,21 @@
 main :: () {
-    table : Table(string, Cipher);
-    init(*table);
-
-    // Generated in build.jai
-    add_ciphers_to_table(*table);
-
     // User specified that they want to run the tests
     // (Added in during compile)
     #if TESTING {
+        table : Table(string, Test);
+        init(*table);
+
+        // Generated in build.jai
+        add_tests_to_table(*table);
+
         test_ciphers(table);
-        exit(0);
+        return;
     } else {
+        table : Table(string, Cipher);
+        init(*table);
+
+        // Generated in build.jai
+        add_ciphers_to_table(*table);
 
         cipher, opts := handle_args();
         cipher_func, success := table_find(*table, cipher);

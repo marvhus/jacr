@@ -36,3 +36,29 @@ caesar :: (using opts: Options) -> bool, string {
     }
     return (true, to_string(out));
 } @cipher
+
+#if TESTING {
+caesar_test :: () -> u16 {
+    failed: u16;
+    decoded := "Hello, World!";
+    encoded := "Axeeh, Phkew!";
+
+    success, resp := caesar(.{
+        mode = .ENCODE,
+        key = "19",
+        inp = decoded,
+    });
+    success &= resp == encoded;
+    print_ok_or_fail(success, "Caesar", "Encoding");
+
+    success, resp = caesar(.{
+        mode = .DECODE,
+        key = "19",
+        inp = encoded,
+    });
+    success &= resp == decoded;
+    print_ok_or_fail(success, "Caesar", "Decoding");
+
+    return failed;
+} @test
+}

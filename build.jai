@@ -48,8 +48,12 @@
     add_build_string(tprint("TESTING :: %;\n", testing), workspace);
 
     // Gather and add code for functions with @cipher note
+    // (or with @test note if compiling with tests)
     functions: [..]string;
     gen_code := false;
+    desired_note := "cipher";
+    if testing then desired_note = "test";
+
     while true {
         message := compiler_wait_for_message();
         if !message break;
@@ -62,14 +66,16 @@
                 if decl.expression.name == "main" continue;
 
             for note: decl.expression.notes {
-                if note.text == "cipher" then array_add(*functions, copy_string(decl.expression.name));
+                if note.text == desired_note {
+                    array_add(*functions, copy_string(decl.expression.name));
+                }
             }
         }
 
         case .PHASE;
         phase := cast(*Message_Phase) message;
         if !gen_code && phase.phase == .TYPECHECKED_ALL_WE_CAN {
-            code := generate_code(functions);
+            code := generate_code(functions, testing);
             add_build_string(code, workspace);
             gen_code = true;
         }
@@ -82,9 +88,12 @@
     compiler_end_intercept(workspace);
 }
 
-generate_code :: (functions: []string) -> string {
+generate_code :: (functions: []string, testing: bool) -> string {
     builder: String_Builder;
-    append(*builder, "add_ciphers_to_table :: (table: Table(string, Cipher)) {\n");
+    function_name := ifx testing then "add_tests_to_table" else "add_ciphers_to_table";
+    value_type := ifx testing then "Test" else "Cipher";
+    print_to_builder(*builder, "% :: (table: Table(string, %)) {\n",
+                     function_name, value_type);
     for func: functions {
         print_to_builder(*builder, "  table_add(*table, \"%1\", %1);\n", func);
     }
